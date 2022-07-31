@@ -48,3 +48,22 @@ coef(reg.m1tag)["DogParkInd"]
 # ==> DogParkInd increase its value.
 
 
+# Part D
+# Find threshold to determine if an apartment is close to the sea:
+# Histogram for Price variable
+hist(HousePrices.df$MtrsToBeach, main = "Histogram for distance to beach", 
+     xlab = "MtrsToBeach", br = 10, col = 'red')
+summary(HousePrices.df$MtrsToBeach)
+
+# Let's choose 1KM as the threshold for "close enough" to the beach.
+beach.thrsh <- 1000
+numstores.thrsh <- 10
+optionA.df <- HousePrices.df[HousePrices.df$MtrsToBeach <= beach.thrsh & HousePrices.df$NumStores < numstores.thrsh & HousePrices.df$DogParkInd == 0, ]
+optionB.df <- HousePrices.df[HousePrices.df$MtrsToBeach > beach.thrsh & HousePrices.df$NumStores >= numstores.thrsh & HousePrices.df$DogParkInd == 1, ]
+
+# Now we will run multiple regression models for each option to determine the optimal suggestion.
+reg.optA <- lm(Price ~ ., data = optionA.df)
+summary(reg.optA)
+
+reg.optB <- lm(Price ~ ., data = optionB.df)
+summary(reg.optB)
