@@ -1,3 +1,4 @@
+### Homework 1 - Data Science, MBA
 
 # Set working directory
 setwd('C:/projects/MBA/Summer22/DataScienceMBA/HW1/')
@@ -7,7 +8,6 @@ options("scipen"=10, "digits"=7)
 
 # Load csv. file
 HousePrices.df <- read.csv(file = "HousePricesHW1.csv")
-
 
 # Part B: Visualization
 
@@ -42,28 +42,25 @@ summary(reg.m2)
 reg.m1tag <- lm(Price ~ .-NumStores, data = HousePrices.df)
 summary(reg.m1tag)
 
-# Print coef for DogParkInd
+# Print coeff for DogParkInd
 coef(reg.m1)["DogParkInd"]
 coef(reg.m1tag)["DogParkInd"]
-# ==> DogParkInd increase its value.
+# ==> DogParkInd increases it's value.
 
 
-# Part D
-# Find threshold to determine if an apartment is close to the sea:
-# Histogram for Price variable
-hist(HousePrices.df$MtrsToBeach, main = "Histogram for distance to beach", 
-     xlab = "MtrsToBeach", br = 10, col = 'red')
-summary(HousePrices.df$MtrsToBeach)
+# Part D: Report
+# Extract relevant coefficients that differentiate between the lot A and lot B.
+coeff.MtrsToBeach <- reg.m1$coefficients["MtrsToBeach"]
+coeff.NumStores <- reg.m1$coefficients["NumStores"]
+coeff.DogParkInd <- reg.m1$coefficients["DogParkInd"]
 
-# Let's choose 1KM as the threshold for "close enough" to the beach.
-beach.thrsh <- 1000
-numstores.thrsh <- 10
-optionA.df <- HousePrices.df[HousePrices.df$MtrsToBeach <= beach.thrsh & HousePrices.df$NumStores < numstores.thrsh & HousePrices.df$DogParkInd == 0, ]
-optionB.df <- HousePrices.df[HousePrices.df$MtrsToBeach > beach.thrsh & HousePrices.df$NumStores >= numstores.thrsh & HousePrices.df$DogParkInd == 1, ]
+# Let's assume that the investor will not be building new stores
+# Also, we know that there aren't dog parks and stores in lot A, so we can 
+# build a tradeoff equation as follows:
+# * DeltaMtrToBeach = MtrToBeach_B - MtrToBeach_A, when:
+# ** MtrToBeach_X is the average distance from an apartment in lot X to the sea.
+NumStoresB.eq <- function(DeltaMtrsToBeach){(-coeff.MtrsToBeach*DeltaMtrsToBeach - coeff.DogParkInd)/coeff.NumStores}
+curve(NumStoresB.eq, from=0, to=5000, xlab="Delta Distance From Beach (B-A)", ylab="Number Of Stores In Lot B")
 
-# Now we will run multiple regression models for each option to determine the optimal suggestion.
-reg.optA <- lm(Price ~ ., data = optionA.df)
-summary(reg.optA)
-
-reg.optB <- lm(Price ~ ., data = optionB.df)
-summary(reg.optB)
+# * Let's plot square meters versus resulting price
+plot(Price ~ SqMtrs, data = HousePrices.df, xlab="Square Meters")
